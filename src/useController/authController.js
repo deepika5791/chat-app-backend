@@ -1,4 +1,5 @@
 const User = require("../model/User");
+const bcrypt = require("bcryptjs");
 
 const signup = async (req, res) => {
   try {
@@ -12,21 +13,32 @@ const signup = async (req, res) => {
       return res.status(400).json({ error: "User already exists" });
     }
 
-    const newUser = new User({ name, email, password });
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const newUser = new User({ name, email, password: hashedPassword });
     await newUser.save();
 
     res.status(201).json({ message: "User created successfully" });
   } catch (err) {
-    console.error(err); // <--- Log the error
+    console.error(err);
     res.status(500).json({ error: "Server error" });
   }
 };
-
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email, password });
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password required" });
+    }
+
+    const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ error: "Invalid credentials" });
+
+    // Compare password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
 
     res.json({
       email: user.email,
@@ -35,6 +47,7 @@ const login = async (req, res) => {
       photo: user.photo,
     });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Server error" });
   }
 };
@@ -48,4 +61,4 @@ const saveProfile = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
-module.exports = { signup , login , saveProfile};
+module.exports = { signup, login, saveProfile };
