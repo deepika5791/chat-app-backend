@@ -1,6 +1,6 @@
 const Message = require("../model/Message");
 const cloudinary = require("../config/cloudnary");
-
+const User = require("../model/User");
 const getMessages = async (req, res) => {
   try {
     const messages = await Message.find().sort({ createdAt: 1 });
@@ -50,5 +50,37 @@ const deleteMessage = async (req, res) => {
   }
 };
 
+const updateProfile = async (req, res) => {
+  try {
+    const { email, name, profilePhoto } = req.body;
+    if (!email) return res.status(400).json({ error: "Email required" });
 
-module.exports = { getMessages, uploadImage, deleteMessage };
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    let newPhotoUrl = user.photo;
+    if (profilePhoto && profilePhoto.startsWith("data:")) {
+      const uploaded = await cloudinary.uploader.upload(profilePhoto, {
+        folder: "user_profiles",
+      });
+      newPhotoUrl = uploaded.secure_url;
+    }
+
+    user.name = name || user.name;
+    user.photo = newPhotoUrl;
+    await user.save();
+
+    res.json({
+      success: true,
+      user: {
+        name: user.name,
+        email: user.email,
+        profilePhoto: user.photo,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Profile update failed" });
+  }
+};
+module.exports = { getMessages, uploadImage, deleteMessage, updateProfile };
