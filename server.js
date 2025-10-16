@@ -130,7 +130,7 @@ io.on("connection", (socket) => {
       const savedMsg = await newMsg.save();
       console.log(" Message saved to MongoDB:", savedMsg);
 
-      io.emit("receiveMessage", savedMsg);
+      io.emit("receiveMessage", { ...savedMsg.toObject(), tempId: msg.tempId });
     } catch (err) {
       console.error(" Failed to save message:", err);
     }
