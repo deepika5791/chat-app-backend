@@ -10,7 +10,14 @@ connectDB();
 const server = http.createServer(app);
 
 const io = new Server(server, {
-  cors: { origin: "*" },
+  cors: {
+    origin: [
+      "http://localhost:5173", // local dev
+      "https://chat-application-eight-brown.vercel.app/", // replace with your real frontend URL
+    ],
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
 });
 
 app.set("io", io);
