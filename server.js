@@ -112,7 +112,12 @@ io.on("connection", (socket) => {
   });
 
   socket.on("sendMessage", async (msg) => {
-    console.log("📩 Received message from client:", msg); // ✅ moved here
+    console.log("Received message from client:", msg);
+
+    if (!msg.sender || !msg.receiver || !msg.message) {
+      console.error(" Missing required fields:", msg);
+      return;
+    }
 
     try {
       const newMsg = new Message({
@@ -123,11 +128,11 @@ io.on("connection", (socket) => {
       });
 
       const savedMsg = await newMsg.save();
-      console.log("✅ Message saved to MongoDB:", savedMsg);
+      console.log(" Message saved to MongoDB:", savedMsg);
 
       io.emit("receiveMessage", savedMsg);
     } catch (err) {
-      console.error("❌ Failed to save message:", err);
+      console.error(" Failed to save message:", err);
     }
   });
 
