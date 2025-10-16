@@ -29,6 +29,7 @@ let userSockets = {};
 
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
+  console.log("📩 Received message from client:", msg);
 
   socket.on("userOnline", (name) => {
     userSockets[name] = socket.id;
