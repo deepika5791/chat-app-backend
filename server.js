@@ -4,6 +4,8 @@ const http = require("http");
 const app = require("./app");
 const { Server } = require("socket.io");
 const connectDB = require("./src/config/db");
+const Message = require("./src/model/Message");
+const User = require("./src/model/User");
 
 connectDB();
 
@@ -27,6 +29,12 @@ let userSockets = {};
 
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
+
+  socket.on("userOnline", (name) => {
+    userSockets[name] = socket.id;
+    if (!onlineUsers.includes(name)) onlineUsers.push(name);
+    io.emit("updateOnlineUsers", onlineUsers);
+  });
   socket.on("sendMessage", async (msg) => {
     try {
       // Save to MongoDB
@@ -36,22 +44,15 @@ io.on("connection", (socket) => {
         message: msg.message,
         createdAt: msg.createdAt || new Date(),
       });
-      await newMsg.save();
+      const savedMsg = await newMsg.save();
 
-      // Broadcast to clients
-      io.emit("receiveMessage", newMsg);
+      // Broadcast to all clients
+      io.emit("receiveMessage", savedMsg);
     } catch (err) {
       console.error("Failed to save message:", err);
     }
   });
-
-  socket.on("userOnline", (name) => {
-    userSockets[name] = socket.id;
-    if (!onlineUsers.includes(name)) onlineUsers.push(name);
-    io.emit("updateOnlineUsers", onlineUsers);
-  });
-
-  socket.on("sendMessage", (msg) => io.emit("receiveMessage", msg));
+  // socket.on("sendMessage", (msg) => io.emit("receiveMessage", msg));
 
   socket.on("deleteMessage", ({ id }) => io.emit("messageDeleted", { id }));
 
