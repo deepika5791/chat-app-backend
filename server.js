@@ -12,8 +12,8 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: [
-      "http://localhost:5173", 
-      "https://chat-application-eight-brown.vercel.app/", 
+      "http://localhost:5173",
+      "https://chat-application-eight-brown.vercel.app/",
     ],
     methods: ["GET", "POST"],
     credentials: true,
@@ -27,6 +27,23 @@ let userSockets = {};
 
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
+  socket.on("sendMessage", async (msg) => {
+    try {
+      // Save to MongoDB
+      const newMsg = new Message({
+        sender: msg.sender,
+        receiver: msg.receiver,
+        message: msg.message,
+        createdAt: msg.createdAt || new Date(),
+      });
+      await newMsg.save();
+
+      // Broadcast to clients
+      io.emit("receiveMessage", newMsg);
+    } catch (err) {
+      console.error("Failed to save message:", err);
+    }
+  });
 
   socket.on("userOnline", (name) => {
     userSockets[name] = socket.id;
