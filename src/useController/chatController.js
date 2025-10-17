@@ -41,7 +41,7 @@ const uploadImage = async (req, res) => {
 const deleteMessage = async (req, res) => {
   try {
     const { id } = req.params;
-    const { requester } = req.body;
+    const { requester } = req.query;
 
     const msg = await Message.findById(id);
     if (!msg) return res.status(404).json({ error: "Message not found" });
