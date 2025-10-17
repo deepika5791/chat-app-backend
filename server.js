@@ -104,7 +104,7 @@ const io = new Server(server, {
     credentials: true,
   },
   allowEIO3: true, // important for WSS in some deployments
-  transports: ["websocket", "polling"],
+  transports: ["polling"],
 });
 
 app.set("io", io);
