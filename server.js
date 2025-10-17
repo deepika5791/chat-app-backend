@@ -97,14 +97,14 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: [
-      "https://chat-application-eight-brown.vercel.app", // frontend URL
+      "https://chat-application-zpb9.vercel.app", // frontend URL
       "http://localhost:5173", // local dev
     ],
     methods: ["GET", "POST"],
     credentials: true,
   },
   allowEIO3: true, // important for WSS in some deployments
-  transports: ["polling"],
+  transports: ["websocket" , "polling"],
 });
 
 app.set("io", io);
