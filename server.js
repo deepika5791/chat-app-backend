@@ -13,13 +13,12 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: [
-      "https://chat-application-eight-brown.vercel.app",
-    ],
+    origin: ["https://chat-application-eight-brown.vercel.app"],
     methods: ["GET", "POST"],
     credentials: true,
   },
-  transports: ["websocket", "polling"], 
+  allowEIO3: true,
+  transports: ["websocket", "polling"],
 });
 
 app.set("io", io);
