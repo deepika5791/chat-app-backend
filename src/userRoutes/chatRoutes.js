@@ -5,8 +5,10 @@ const {
   uploadImage,
   deleteMessage,
   updateProfile,
+  saveMessage,
 } = require("../useController/chatController");
 
+router.post("/", saveMessage);
 router.get("/", getMessages);
 router.post("/upload-image", uploadImage);
 router.delete("/:id", deleteMessage);

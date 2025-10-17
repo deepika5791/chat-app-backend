@@ -7,10 +7,21 @@ const getMessages = async (req, res) => {
     res.json(messages);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: "Server error" });  
   }
 };
+const saveMessage = async (req, res) => {
+  try {
+    const { sender, receiver, message } = req.body;
 
+    const chat = new Message({ sender, receiver, message });
+    await chat.save();
+
+    res.status(201).json({ success: true, chat });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
 const uploadImage = async (req, res) => {
   try {
     const { image } = req.body;
@@ -83,4 +94,10 @@ const updateProfile = async (req, res) => {
     res.status(500).json({ error: "Profile update failed" });
   }
 };
-module.exports = { getMessages, uploadImage, deleteMessage, updateProfile };
+module.exports = {
+  getMessages,
+  uploadImage,
+  deleteMessage,
+  updateProfile,
+  saveMessage,
+};
