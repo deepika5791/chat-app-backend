@@ -46,8 +46,8 @@ const deleteMessage = async (req, res) => {
     const msg = await Message.findById(id);
     if (!msg) return res.status(404).json({ error: "Message not found" });
 
-    if (msg.sender.toString() !== requester.toString())
-      return res.status(403).json({ error: "Not authorized" });
+    // if (msg.sender.toString() !== requester.toString())
+    //   return res.status(403).json({ error: "Not authorized" });
 
     await Message.findByIdAndDelete(id);
 
