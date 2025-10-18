@@ -3,15 +3,15 @@ const router = express.Router();
 const {
   getMessages,
   uploadImage,
-  deleteMessage,
   updateProfile,
   saveMessage,
+  deleteMessage,
 } = require("../useController/chatController");
 
+router.delete("/:id", deleteMessage); // add this
 router.post("/", saveMessage);
 router.get("/", getMessages);
 router.post("/upload-image", uploadImage);
-router.delete("/:id", deleteMessage);
 router.put("/profile", updateProfile);
 
 module.exports = router;
