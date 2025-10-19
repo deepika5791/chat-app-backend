@@ -8,10 +8,9 @@ const {
   deleteMessage,
 } = require("../useController/chatController");
 
-router.delete("/:id/:sender", deleteMessage);
 router.post("/", saveMessage);
 router.get("/", getMessages);
 router.post("/upload-image", uploadImage);
 router.put("/profile", updateProfile);
-
+router.delete("/:id", deleteMessage);
 module.exports = router;

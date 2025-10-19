@@ -62,22 +62,11 @@ io.on("connection", (socket) => {
       console.error("Failed to save message:", err);
     }
   });
-
-socket.on("deleteMessage", async ({ msgId, sender, receiver }) => {
-  try {
-    const deleted = await Message.findByIdAndDelete(msgId);
-    if (deleted) {
-      [sender, receiver].forEach((name) => {
-        if (userSockets[name]) {
-          io.to(userSockets[name]).emit("messageDeleted", msgId);
-        }
-      });
-    }
-  } catch (err) {
-    console.error("Failed to delete message via socket:", err);
-  }
-});
-
+  socket.on("deleteMessage", (payload) => {
+    // payload can be { _id } or { tempId } - server will broadcast to clients for UI sync
+    console.log("socket deleteMessage payload:", payload);
+    io.emit("messageDeleted", payload);
+  });
 
   socket.on("disconnect", () => {
     console.log(" Socket disconnected:", socket.id);
@@ -91,7 +80,5 @@ socket.on("deleteMessage", async ({ msgId, sender, receiver }) => {
     }
   });
 });
-
-
 
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

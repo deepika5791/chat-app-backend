@@ -71,31 +71,33 @@ const updateProfile = async (req, res) => {
     res.status(500).json({ error: "Profile update failed" });
   }
 };
-
 const deleteMessage = async (req, res) => {
-   try {
-     const { id, sender } = req.params;
-     const message = await Message.findById(id);
-     if (!message)
-       return res.status(404).json({ message: "Message not found" });
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ success: false, error: "No id" });
 
-     if (message.sender !== sender) {
-       return res.status(403).json({ message: "Not authorized" });
-     }
+    const deleted = await Message.findByIdAndDelete(id);
+    if (!deleted)
+      return res
+        .status(404)
+        .json({ success: false, error: "Message not found" });
 
-     await Message.findByIdAndDelete(id);
-     res.json({ success: true });
-   } catch (err) {
-     console.error("Delete error:", err);
-     res.status(500).json({ error: err.message });
-   }
+    // Emit with io stored on express app
+    const io = req.app.get("io");
+    if (io) {
+      io.emit("messageDeleted", { _id: id });
+    }
+
+    res.json({ success: true, id });
+  } catch (err) {
+    console.error("Delete message error:", err);
+    res.status(500).json({ success: false, error: "Failed to delete message" });
+  }
 };
-
 module.exports = {
   getMessages,
   uploadImage,
   updateProfile,
   saveMessage,
-  deleteMessage
-
+  deleteMessage,
 };
