@@ -63,11 +63,8 @@ io.on("connection", (socket) => {
     }
   });
   socket.on("deleteMessage", (payload) => {
-    // payload can be { _id } or { tempId } - server will broadcast to clients for UI sync
-    console.log("socket deleteMessage payload:", payload);
     io.emit("messageDeleted", payload);
   });
-
   socket.on("disconnect", () => {
     console.log(" Socket disconnected:", socket.id);
     for (let name in userSockets) {

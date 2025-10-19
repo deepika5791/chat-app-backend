@@ -74,7 +74,8 @@ const updateProfile = async (req, res) => {
 const deleteMessage = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!id) return res.status(400).json({ success: false, error: "No id" });
+    if (!id)
+      return res.status(400).json({ success: false, error: "No id provided" });
 
     const deleted = await Message.findByIdAndDelete(id);
     if (!deleted)
@@ -82,7 +83,6 @@ const deleteMessage = async (req, res) => {
         .status(404)
         .json({ success: false, error: "Message not found" });
 
-    // Emit with io stored on express app
     const io = req.app.get("io");
     if (io) {
       io.emit("messageDeleted", { _id: id });
@@ -90,7 +90,7 @@ const deleteMessage = async (req, res) => {
 
     res.json({ success: true, id });
   } catch (err) {
-    console.error("Delete message error:", err);
+    console.error("deleteMessage error:", err);
     res.status(500).json({ success: false, error: "Failed to delete message" });
   }
 };
