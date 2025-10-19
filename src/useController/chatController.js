@@ -37,18 +37,6 @@ const uploadImage = async (req, res) => {
     res.status(500).json({ error: "Image upload failed" });
   }
 };
-const deleteMessage = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const deleted = await Message.findByIdAndDelete(id);
-    if (!deleted) return res.status(404).json({ error: "Message not found" });
-    res.json({ success: true });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to delete message" });
-  }
-};
-
 
 const updateProfile = async (req, res) => {
   try {
@@ -83,10 +71,24 @@ const updateProfile = async (req, res) => {
     res.status(500).json({ error: "Profile update failed" });
   }
 };
+
+const deleteMessage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const message = await Message.findByIdAndDelete(id);
+    if (!message) return res.status(404).json({ error: "Message not found" });
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to delete message" });
+  }
+};
+
 module.exports = {
   getMessages,
   uploadImage,
   updateProfile,
   saveMessage,
-  deleteMessage,
+  deleteMessage
+
 };

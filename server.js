@@ -11,7 +11,6 @@ connectDB();
 const PORT = process.env.PORT || 5000;
 const server = http.createServer(app);
 
-
 const io = new Server(server, {
   cors: {
     origin: [
@@ -21,7 +20,7 @@ const io = new Server(server, {
     methods: ["GET", "POST"],
     credentials: true,
   },
-  allowEIO3: true, 
+  allowEIO3: true,
   transports: ["websocket", "polling"],
 });
 
@@ -33,13 +32,11 @@ let userSockets = {};
 io.on("connection", (socket) => {
   console.log("Socket connected:", socket.id);
 
-
   socket.on("userOnline", (name) => {
     userSockets[name] = socket.id;
     if (!onlineUsers.includes(name)) onlineUsers.push(name);
     io.emit("updateOnlineUsers", onlineUsers);
   });
-
 
   socket.on("sendMessage", async (msg) => {
     console.log("Received message:", msg);
@@ -60,13 +57,12 @@ io.on("connection", (socket) => {
       const savedMsg = await newMsg.save();
       console.log("Message saved:", savedMsg);
 
-     
       io.emit("receiveMessage", { ...savedMsg.toObject(), tempId: msg.tempId });
     } catch (err) {
       console.error("Failed to save message:", err);
     }
   });
-  
+
   socket.on("disconnect", () => {
     console.log(" Socket disconnected:", socket.id);
     for (let name in userSockets) {
@@ -80,4 +76,19 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+socket.on("deleteMessage", async ({ msgId, sender, receiver }) => {
+  try {
+    const deleted = await Message.findByIdAndDelete(msgId);
+    if (deleted) {
+      [sender, receiver].forEach((name) => {
+        if (userSockets[name]) {
+          io.to(userSockets[name]).emit("messageDeleted", msgId);
+        }
+      });
+    }
+  } catch (err) {
+    console.error("Failed to delete message via socket:", err);
+  }
+});
+
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
