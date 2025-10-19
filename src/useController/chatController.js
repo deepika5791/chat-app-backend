@@ -10,6 +10,19 @@ const getMessages = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+// const saveMessage = async (req, res) => {
+//   try {
+//     const { sender, receiver, message } = req.body;
+
+//     const chat = new Message({ sender, receiver, message });
+//     await chat.save();
+
+//     res.status(201).json({ success: true, chat });
+//   } catch (err) {
+//     res.status(500).json({ success: false, error: err.message });
+//   }
+// };
+
 const saveMessage = async (req, res) => {
   try {
     const { sender, receiver, message } = req.body;
@@ -17,11 +30,32 @@ const saveMessage = async (req, res) => {
     const chat = new Message({ sender, receiver, message });
     await chat.save();
 
+    const io = req.app.get("io");
+    if (io) io.emit("receiveMessage", chat); // broadcast after save
+
     res.status(201).json({ success: true, chat });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 };
+
+const deleteMessage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ error: "No id provided" });
+
+    const deleted = await Message.findByIdAndDelete(id);
+    if (!deleted) return res.status(404).json({ error: "Message not found" });
+
+    const io = req.app.get("io");
+    if (io) io.emit("messageDeleted", { _id: id });
+
+    res.json({ success: true, id });
+  } catch (err) {
+    res.status(500).json({ success: false, error: "Failed to delete message" });
+  }
+};
+
 const uploadImage = async (req, res) => {
   try {
     const { image } = req.body;
@@ -71,29 +105,7 @@ const updateProfile = async (req, res) => {
     res.status(500).json({ error: "Profile update failed" });
   }
 };
-const deleteMessage = async (req, res) => {
-  try {
-    const { id } = req.params;
-    if (!id)
-      return res.status(400).json({ success: false, error: "No id provided" });
 
-    const deleted = await Message.findByIdAndDelete(id);
-    if (!deleted)
-      return res
-        .status(404)
-        .json({ success: false, error: "Message not found" });
-
-    const io = req.app.get("io");
-    if (io) {
-      io.emit("messageDeleted", { _id: id });
-    }
-
-    res.json({ success: true, id });
-  } catch (err) {
-    console.error("deleteMessage error:", err);
-    res.status(500).json({ success: false, error: "Failed to delete message" });
-  }
-};
 module.exports = {
   getMessages,
   uploadImage,

@@ -62,9 +62,11 @@ io.on("connection", (socket) => {
       console.error("Failed to save message:", err);
     }
   });
+
   socket.on("deleteMessage", (payload) => {
     io.emit("messageDeleted", payload);
   });
+
   socket.on("disconnect", () => {
     console.log(" Socket disconnected:", socket.id);
     for (let name in userSockets) {
