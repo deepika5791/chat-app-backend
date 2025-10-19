@@ -73,15 +73,22 @@ const updateProfile = async (req, res) => {
 };
 
 const deleteMessage = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const message = await Message.findByIdAndDelete(id);
-    if (!message) return res.status(404).json({ error: "Message not found" });
-    res.json({ success: true });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to delete message" });
-  }
+   try {
+     const { id, sender } = req.params;
+     const message = await Message.findById(id);
+     if (!message)
+       return res.status(404).json({ message: "Message not found" });
+
+     if (message.sender !== sender) {
+       return res.status(403).json({ message: "Not authorized" });
+     }
+
+     await Message.findByIdAndDelete(id);
+     res.json({ success: true });
+   } catch (err) {
+     console.error("Delete error:", err);
+     res.status(500).json({ error: err.message });
+   }
 };
 
 module.exports = {
