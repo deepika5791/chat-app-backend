@@ -63,19 +63,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("disconnect", () => {
-    console.log(" Socket disconnected:", socket.id);
-    for (let name in userSockets) {
-      if (userSockets[name] === socket.id) {
-        delete userSockets[name];
-        onlineUsers = onlineUsers.filter((u) => u !== name);
-        io.emit("updateOnlineUsers", onlineUsers);
-        break;
-      }
-    }
-  });
-});
-
 socket.on("deleteMessage", async ({ msgId, sender, receiver }) => {
   try {
     const deleted = await Message.findByIdAndDelete(msgId);
@@ -90,5 +77,21 @@ socket.on("deleteMessage", async ({ msgId, sender, receiver }) => {
     console.error("Failed to delete message via socket:", err);
   }
 });
+
+
+  socket.on("disconnect", () => {
+    console.log(" Socket disconnected:", socket.id);
+    for (let name in userSockets) {
+      if (userSockets[name] === socket.id) {
+        delete userSockets[name];
+        onlineUsers = onlineUsers.filter((u) => u !== name);
+        io.emit("updateOnlineUsers", onlineUsers);
+        break;
+      }
+    }
+  });
+});
+
+
 
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
