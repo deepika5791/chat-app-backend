@@ -25,13 +25,29 @@ const getMessages = async (req, res) => {
 
 const saveMessage = async (req, res) => {
   try {
-    const { sender, receiver, message } = req.body;
+    const { sender, receiver, message, createdAt } = req.body;
 
-    const chat = new Message({ sender, receiver, message });
+    // Check if the same message already exists
+    const existing = await Message.findOne({
+      sender,
+      receiver,
+      message,
+      createdAt: createdAt || { $exists: false }, // optional if createdAt not passed
+    });
+
+    if (existing) {
+      // Don't save duplicates
+      return res
+        .status(200)
+        .json({ success: true, chat: existing, duplicate: true });
+    }
+
+    const chat = new Message({ sender, receiver, message, createdAt });
     await chat.save();
 
+    // Emit via Socket.io
     const io = req.app.get("io");
-    if (io) io.emit("receiveMessage", chat); // broadcast after save
+    if (io) io.emit("receiveMessage", chat);
 
     res.status(201).json({ success: true, chat });
   } catch (err) {
