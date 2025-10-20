@@ -61,15 +61,48 @@ const uploadImage = async (req, res) => {
   }
 };
 
+// const updateProfile = async (req, res) => {
+//   try {
+//     const { email, name, profilePhoto } = req.body;
+//     if (!email) return res.status(400).json({ error: "Email required" });
+
+//     const user = await User.findOne({ email });
+//     if (!user) return res.status(404).json({ error: "User not found" });
+
+//     let newPhotoUrl = user.photo;
+//     if (profilePhoto && profilePhoto.startsWith("data:")) {
+//       const uploaded = await cloudinary.uploader.upload(profilePhoto, {
+//         folder: "user_profiles",
+//       });
+//       newPhotoUrl = uploaded.secure_url;
+//     }
+
+//     user.name = name || user.name;
+//     user.photo = newPhotoUrl;
+//     await user.save();
+
+//     res.json({
+//       success: true,
+//       user: { name: user.name, email: user.email, profilePhoto: user.photo },
+//     });
+//   } catch (err) {
+//     res.status(500).json({ error: "Profile update failed" });
+//   }
+// };
+
 const updateProfile = async (req, res) => {
   try {
     const { email, name, profilePhoto } = req.body;
-    if (!email) return res.status(400).json({ error: "Email required" });
+    if (!email)
+      return res.status(400).json({ success: false, error: "Email required" });
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ error: "User not found" });
+    if (!user)
+      return res.status(404).json({ success: false, error: "User not found" });
 
     let newPhotoUrl = user.photo;
+
+    // Upload to Cloudinary if new image data
     if (profilePhoto && profilePhoto.startsWith("data:")) {
       const uploaded = await cloudinary.uploader.upload(profilePhoto, {
         folder: "user_profiles",
@@ -83,10 +116,15 @@ const updateProfile = async (req, res) => {
 
     res.json({
       success: true,
-      user: { name: user.name, email: user.email, profilePhoto: user.photo },
+      user: {
+        name: user.name,
+        email: user.email,
+        photo: user.photo,
+      },
     });
   } catch (err) {
-    res.status(500).json({ error: "Profile update failed" });
+    console.error(err);
+    res.status(500).json({ success: false, error: "Profile update failed" });
   }
 };
 
