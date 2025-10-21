@@ -63,7 +63,7 @@ const uploadImage = async (req, res) => {
 
 const updateProfile = async (req, res) => {
   try {
-    const { email, name, profilePhoto } = req.body;
+    const { email, name, profilePhoto , bio} = req.body;
     if (!email)
       return res.status(400).json({ success: false, error: "Email required" });
 
@@ -82,6 +82,7 @@ const updateProfile = async (req, res) => {
 
     user.name = name || user.name;
     user.photo = newPhotoUrl;
+     user.bio = bio || user.bio; 
     await user.save();
 
     res.json({
@@ -90,6 +91,7 @@ const updateProfile = async (req, res) => {
         name: user.name,
         email: user.email,
         photo: user.photo,
+        bio: user.bio,
       },
     });
   } catch (err) {
