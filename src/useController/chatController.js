@@ -21,7 +21,7 @@ const saveMessage = async (req, res) => {
     await chat.save();
 
     const io = req.app.get("io");
-    if (io) io.emit("receiveMessage", chat); // broadcast to all users
+    if (io) io.emit("receiveMessage", chat); 
 
     res.status(201).json({ success: true, chat });
   } catch (err) {
@@ -73,7 +73,6 @@ const updateProfile = async (req, res) => {
 
     let newPhotoUrl = user.photo;
 
-    // Upload to Cloudinary if new image data
     if (profilePhoto && profilePhoto.startsWith("data:")) {
       const uploaded = await cloudinary.uploader.upload(profilePhoto, {
         folder: "user_profiles",
