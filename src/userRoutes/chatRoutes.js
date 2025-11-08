@@ -8,6 +8,10 @@ const {
   deleteMessage,
 } = require("../useController/chatController");
 
+router.get("/uptime", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
 router.post("/", saveMessage);
 router.get("/", getMessages);
 router.post("/upload-image", uploadImage);
